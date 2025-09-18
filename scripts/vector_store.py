@@ -1,5 +1,6 @@
 import os
 import re
+from encodings import search_function
 from pathlib import Path
 from uuid import uuid4
 
@@ -10,6 +11,11 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.docstore.in_memory import InMemoryDocstore
 from langchain.schema import Document
 import faiss
+
+
+# Initialize Hugging Face embeddings
+embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+dim = len(embeddings.embed_query("hello world"))
 
 
 def download_faq(url):
@@ -23,16 +29,11 @@ def download_faq(url):
     return docs
 
 
-def main():
+def build_vector_store():
     url = "https://storage.googleapis.com/benchmarks-artifacts/travel-db/swiss_faq.md"
     docs = download_faq(url)
 
     uuids = [str(uuid4()) for _ in range(len(docs))]
-
-    # Initialize Hugging Face embeddings
-    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-
-    dim = len(embeddings.embed_query("hello world"))
 
     # Create HNSW index
     index = faiss.IndexHNSWFlat(dim, 32)  # M=32 neighbors
@@ -55,5 +56,11 @@ def main():
     vector_store.save_local(str(storage_dir))
 
 
+def load_vector_store_as_retriever(storage_dir="../storage",  ):
+    vector_store = FAISS.load_local(storage_dir, embeddings, allow_dangerous_deserialization=True)
+    retriever = vector_store.as_retriever(search_type="mmr", search_kwargs={"k":2})
+    return retriever
+
+
 if __name__ == "__main__":
-    main()
+    build_vector_store()
