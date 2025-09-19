@@ -3,24 +3,11 @@ from datetime import datetime
 import os
 
 from langchain_openai import ChatOpenAI
-from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable, RunnableConfig
 
 from state import State
-from travel_agent.tools.policy_tools import lookup_policy
-from travel_agent.tools.trip_tools import (
-    search_trip_recommendations,
-    book_excursion,
-    update_excursion,
-    cancel_excursion
-)
-from travel_agent.tools.flight_tools import (
-    fetch_user_flight_information,
-    search_flights,
-    update_ticket_to_new_flight,
-    cancel_ticket,
-)
+from travel_agent.tools import tools
 
 
 load_dotenv()
@@ -75,18 +62,5 @@ def build_assistant() -> Assistant:
         ]
     ).partial(time=datetime.now)
 
-    part_1_tools = [
-        TavilySearchResults(max_results=1),
-        fetch_user_flight_information,
-        search_flights,
-        lookup_policy,
-        update_ticket_to_new_flight,
-        cancel_ticket,
-        search_trip_recommendations,
-        book_excursion,
-        update_excursion,
-        cancel_excursion,
-    ]
-
-    runnable = primary_assistant_prompt | llm.bind_tools(part_1_tools)
+    runnable = primary_assistant_prompt | llm.bind_tools(tools)
     return Assistant(runnable)
