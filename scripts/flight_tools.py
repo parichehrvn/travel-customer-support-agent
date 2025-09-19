@@ -5,7 +5,6 @@ from typing import Optional
 import pytz
 from langchain_core.tools import tool
 from langchain_core.runnables import RunnableConfig
-from sympy.matrices.benchmarks.bench_matrix import timeit_Matrix_zeronm
 
 from vector_store import load_vector_store_as_retriever
 
