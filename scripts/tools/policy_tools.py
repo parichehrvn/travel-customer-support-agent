@@ -1,6 +1,6 @@
 from langchain_core.tools import tool
 
-from vector_store import load_vector_store_as_retriever
+from scripts.vector_store import load_vector_store_as_retriever
 
 
 @tool

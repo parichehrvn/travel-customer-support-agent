@@ -6,18 +6,6 @@ import pytz
 from langchain_core.tools import tool
 from langchain_core.runnables import RunnableConfig
 
-from vector_store import load_vector_store_as_retriever
-
-
-@tool
-def lookup_policy(query: str) -> str:
-    """Consult the company policies to check whether certain options are permitted.
-        Use this before making any flight changes performing other 'write' events."""
-
-    retriever = load_vector_store_as_retriever()
-    docs = retriever.invoke(query)
-    return "\n\n".join(doc["page_content"] for doc in docs)
-
 
 @tool
 def fetch_user_flight_information(config: RunnableConfig, db="../data/travel.sqlite") -> list[dict]:
