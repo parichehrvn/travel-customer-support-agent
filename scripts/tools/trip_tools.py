@@ -8,7 +8,7 @@ from langchain_core.tools import tool
 from sqlalchemy.engine import row
 
 
-# @tool
+@tool
 def search_trip_recommendations(
         location : Optional[str] = None,
         name : Optional[str] = None,
@@ -55,5 +55,89 @@ def search_trip_recommendations(
     return results
 
 
+@tool
+def book_excursion(recommendation_id : int, db="../../data/travel.sqlite") -> str:
+    """
+        Book an excursion by its recommendation ID.
 
+        Args:
+            recommendation_id (int): The ID of the trip recommendation to book.
+
+        Returns:
+            str: A message indicating whether the trip recommendation was successfully booked or not.
+        """
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+
+    cursor.execute("UPDATE trip_recommendations SET booked = 1 WHERE id = ?", (recommendation_id,))
+    conn.commit()
+
+    if cursor.rowcount > 0:
+        cursor.close()
+        conn.close()
+        return f"Trip recommendation {recommendation_id} successfully booked."
+    else:
+        cursor.close()
+        conn.close()
+        return f"No trip recommendation found with ID {recommendation_id}."
+
+
+@tool
+def update_excursion(recommendation_id: int, details: str, db="../../data/travel.sqlite") -> str:
+    """
+    Update a trip recommendation's details by its ID.
+
+    Args:
+        recommendation_id (int): The ID of the trip recommendation to update.
+        details (str): The new details of the trip recommendation.
+
+    Returns:
+        str: A message indicating whether the trip recommendation was successfully updated or not.
+    """
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "UPDATE trip_recommendations SET details = ? WHERE id = ?",
+        (details, recommendation_id),
+    )
+    conn.commit()
+
+    if cursor.rowcount > 0:
+        cursor.close()
+        conn.close()
+        return f"Trip recommendation {recommendation_id} successfully updated."
+    else:
+        cursor.close()
+        conn.close()
+        return f"No trip recommendation found with ID {recommendation_id}."
+
+
+@tool
+def cancel_excursion(recommendation_id: int, db="../../data/travel.sqlite") -> str:
+    """
+    Cancel a trip recommendation by its ID.
+
+    Args:
+        recommendation_id (int): The ID of the trip recommendation to cancel.
+
+    Returns:
+        str: A message indicating whether the trip recommendation was successfully cancelled or not.
+    """
+    conn = sqlite3.connect(db)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "UPDATE trip_recommendations SET booked = 0 WHERE id = ?", (recommendation_id,)
+    )
+    conn.commit()
+
+    if cursor.rowcount > 0:
+        cursor.close()
+        conn.close()
+        return f"Trip recommendation {recommendation_id} successfully cancelled."
+    else:
+        cursor.close()
+        conn.close()
+        return f"No trip recommendation found with ID {recommendation_id}."
 
