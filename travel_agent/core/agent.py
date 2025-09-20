@@ -6,7 +6,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable, RunnableConfig
 
-from state import State
+from travel_agent.core.state import State
 from travel_agent.tools import tools
 
 
