@@ -54,7 +54,7 @@ def build_vector_store():
     vector_store.save_local(str(storage_dir))
 
 
-def load_vector_store_as_retriever(storage_dir="../storage",  ):
+def load_vector_store_as_retriever(storage_dir="vector_store/storage",  ):
     vector_store = FAISS.load_local(storage_dir, embeddings, allow_dangerous_deserialization=True)
     retriever = vector_store.as_retriever(search_type="mmr", search_kwargs={"k":2})
     return retriever

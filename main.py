@@ -8,8 +8,9 @@ graph = build_basic_graph()
 
 tutorial_questions = [
     "Hi there, what time is my flight?",
-    "Am i allowed to update my flight to something sooner? I want to leave later today.",
-    "Update my flight to sometime next week then",
+    # "yes, this is my passenger id and ticket number",
+    # "Am i allowed to update my flight to something sooner? I want to leave later today.",
+    # "Update my flight to sometime next week then",
     # "The next available option is great",
     # "what about lodging and transportation?",
     # "Yeah i think i'd like an affordable hotel for my week-long stay (7 days). And I'll want to rent a car.",
@@ -39,9 +40,33 @@ config = {
 }
 
 _printed = set()
-for question in tutorial_questions:
+# for question in tutorial_questions:
+#     events = graph.stream(
+#         {"messages": ("user", question)}, config, stream_mode="values"
+#     )
+#     for event in events:
+#         _print_event(event, _printed)
+
+while True:
+    question = input(">")
     events = graph.stream(
-        {"messages": ("user", question)}, config, stream_mode="values"
+        {"messages": [{"role": "user", "content": question}]}, config, stream_mode="values"
     )
     for event in events:
         _print_event(event, _printed)
+    if question == "end":
+        break
+    # for message_chunk, metadata in graph.stream(
+    #     {"messages": [{"role": "user", "content": question}]}, config, stream_mode="messages"
+    # ):
+    #     if message_chunk.content and metadata["langgraph_node"] != "tools":
+    #         print(message_chunk.content)
+    # for question in tutorial_questions:
+    #     events = graph.stream(
+    #         {"messages": [{"role": "user", "content": question}]}, config, stream_mode="values"
+    #     )
+    #     for event in events:
+    #         _print_event(event, _printed)
+    #     if question == "end":
+    #         break
+

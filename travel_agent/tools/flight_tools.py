@@ -8,7 +8,7 @@ from langchain_core.runnables import RunnableConfig
 
 
 @tool
-def fetch_user_flight_information(config: RunnableConfig, db="../data/travel.sqlite") -> list[dict]:
+def fetch_user_flight_information(config: RunnableConfig, db="data/travel.sqlite") -> list[dict]:
     """Fetch all tickets for the user along with corresponding flight information and seat assignments.
 
     Returns:
@@ -29,9 +29,9 @@ def fetch_user_flight_information(config: RunnableConfig, db="../data/travel.sql
             bp.seat_no, tf.fare_conditions
         FROM
             tickets t
-            JOIN ticket_flights tf ON t.ticket_no = t.ticket_no
+            JOIN ticket_flights tf ON t.ticket_no = tf.ticket_no
             JOIN flights f ON tf.flight_id=f.flight_id
-            JOIN boarding_passes bp ON bp.ticket_no=t.ticket_no AND bp.flight_id=f.flight_id
+            LEFT JOIN boarding_passes bp ON bp.ticket_no=t.ticket_no AND bp.flight_id=f.flight_id
         WHERE
             t.passenger_id = ?
         """
@@ -58,7 +58,7 @@ def search_flights(
     start_time: Optional[date | datetime] = None,
     end_time: Optional[date | datetime] = None,
     limit: int = 20,
-    db="../data/travel.sqlite"
+    db="data/travel.sqlite"
 ) -> list[dict]:
     """Search for flights based on departure airport, arrival airport, and departure time range."""
     conn = sqlite3.connect(db)
@@ -68,7 +68,7 @@ def search_flights(
     params = []
 
     if departure_airport:
-        query += "AND departure_airport = ?"
+        query += " AND departure_airport = ?"
         params.append(departure_airport)
 
     if arrival_airport:
@@ -99,7 +99,7 @@ def search_flights(
 
 @tool
 def update_ticket_to_new_flight(
-    ticket_no: str, new_flight_id: int, *, config: RunnableConfig, db="../data/travel.sqlite"
+    ticket_no: str, new_flight_id: int, current_flight_id: int, *, config: RunnableConfig, db="data/travel.sqlite"
 ) -> str:
     """Update the user's ticket to a new valid flight."""
     try:
@@ -143,7 +143,7 @@ def update_ticket_to_new_flight(
 
         # Check the signed-in user actually has this ticket
         cursor.execute(
-            "SELECT * FROM tickets WHERE ticket-no = ? AND passenger_id = ?",
+            "SELECT * FROM tickets WHERE ticket_no = ? AND passenger_id = ?",
             (ticket_no, passenger_id)
         )
         current_ticket = cursor.fetchone()
@@ -153,8 +153,8 @@ def update_ticket_to_new_flight(
             return f"Current signed-in passenger with ID {passenger_id} not the owner of ticket {ticket_no}"
 
         cursor.execute(
-            "UPDATE ticket_flights SET flight_id = ? WHERE ticket_no = ?",
-            (new_flight_id, ticket_no)
+            "UPDATE ticket_flights SET flight_id = ? WHERE ticket_no = ? AND flight_id = ?",
+            (new_flight_id, ticket_no, current_flight_id)
         )
         conn.commit()
 
@@ -167,7 +167,7 @@ def update_ticket_to_new_flight(
 
 
 @tool
-def cancel_ticket(ticket_no : str, *, config : RunnableConfig, db="../data/travel.sqlite") -> str:
+def cancel_ticket(ticket_no : str, *, config : RunnableConfig, db="data/travel.sqlite") -> str:
     """Cancel the user's ticket and remove it from the database."""
     try:
         configuration = config["configurable"]
