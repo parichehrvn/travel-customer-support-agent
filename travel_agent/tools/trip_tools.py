@@ -13,7 +13,7 @@ def search_trip_recommendations(
         location : Optional[str] = None,
         name : Optional[str] = None,
         keywords : Optional[str] = None,
-        db="../../data/travel.sqlite"
+        db="data/travel.sqlite"
 ) -> list[dict]:
     """
     Search for trip recommendations based on location, name, and keywords.
@@ -33,15 +33,15 @@ def search_trip_recommendations(
     params = []
 
     if location:
-        query += "AND location LIKE ?"
+        query += " AND location LIKE ?"
         params.append(f"%{location}%")
     if name:
-        query += "AND name LIKE ?"
+        query += " AND name LIKE ?"
         params.append(f"%{name}%")
     if keywords:
         keyword_list = keywords.split(",")
         keyword_conditions = " OR ".join(["keywords LIKE ?" for _ in keyword_list])
-        query += f"AND ({keyword_conditions})"
+        query += f" AND ({keyword_conditions})"
         params.extend([f"%{keyword.strip()}%" for keyword in keyword_list])
 
     cursor.execute(query, params)
@@ -56,7 +56,7 @@ def search_trip_recommendations(
 
 
 @tool
-def book_excursion(recommendation_id : int, db="../../data/travel.sqlite") -> str:
+def book_excursion(recommendation_id : int, db="data/travel.sqlite") -> str:
     """
         Book an excursion by its recommendation ID.
 
@@ -83,7 +83,7 @@ def book_excursion(recommendation_id : int, db="../../data/travel.sqlite") -> st
 
 
 @tool
-def update_excursion(recommendation_id: int, details: str, db="../../data/travel.sqlite") -> str:
+def update_excursion(recommendation_id: int, details: str, db="data/travel.sqlite") -> str:
     """
     Update a trip recommendation's details by its ID.
 
@@ -114,7 +114,7 @@ def update_excursion(recommendation_id: int, details: str, db="../../data/travel
 
 
 @tool
-def cancel_excursion(recommendation_id: int, db="../../data/travel.sqlite") -> str:
+def cancel_excursion(recommendation_id: int, db="data/travel.sqlite") -> str:
     """
     Cancel a trip recommendation by its ID.
 
