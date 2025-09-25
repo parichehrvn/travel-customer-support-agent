@@ -12,7 +12,8 @@ import faiss
 
 
 # Initialize Hugging Face embeddings
-embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2",
+                                   model_kwargs={"device": "cpu"})
 dim = len(embeddings.embed_query("hello world"))
 
 

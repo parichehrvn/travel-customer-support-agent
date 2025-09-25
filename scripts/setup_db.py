@@ -16,6 +16,7 @@ def download_dataset(db_url, local_file, backup_file):
 
 
 def update_dates(db_file):
+    print("################### update DB ############################")
     # establish a connection to an SQLite database
     conn = sqlite3.connect(db_file)
 

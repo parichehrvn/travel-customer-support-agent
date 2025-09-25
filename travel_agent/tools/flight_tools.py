@@ -109,6 +109,7 @@ def update_ticket_to_new_flight(
         conn = sqlite3.connect(db)
         cursor = conn.cursor()
 
+        # Ensure new flight exists and departs at least 3 hours from now
         cursor.execute(
             "SELECT departure_airport, arrival_airport, scheduled_departure FROM flights WHERE flight_id = ?",
             (new_flight_id,),
@@ -127,10 +128,25 @@ def update_ticket_to_new_flight(
         departure_time = datetime.strptime(
             new_flight_dict["scheduled_departure"], "%Y-%m-%d %H:%M:%S.%f%z"
         )
-        time_until = (departure_time - current_time).total_seconds()
-        if time_until < (3 * 3600):
+        time_until_next_flight = (departure_time - current_time).total_seconds()
+        if time_until_next_flight < (3 * 3600):
             return f"Not permitted to reschedule to a flight that is less than 3 hours from the current time. Selected flight is at {departure_time}."
 
+        # Ensure current departure time is at least 3 hours from now
+        # cursor.execute("SELECT scheduled_departure FROM flights WHERE flight_id = ?", (current_flight_id,))
+        # current_scheduled_departure = cursor.fetchone()
+        # if not current_scheduled_departure:
+        #     cursor.close()
+        #     conn.close()
+        #     return "Invalid flight ID provided."
+        # current_scheduled_departure = datetime.strptime(
+        #     current_scheduled_departure[0], "%Y-%m-%d %H:%M:%S.%f%z"
+        # )
+        # time_until_current_flight = (current_scheduled_departure - current_time).total_seconds()
+        # if time_until_current_flight < (3 * 3600):
+        #     return f"Not permitted to reschedule a flight that is less than 3 hours from the current time. Current flight is at {current_scheduled_departure}."
+
+        # Ensure passenger owns the ticket
         cursor.execute(
             "SELECT flight_id FROM ticket_flights WHERE ticket_no = ?",
             (ticket_no,)
@@ -152,6 +168,7 @@ def update_ticket_to_new_flight(
             conn.close()
             return f"Current signed-in passenger with ID {passenger_id} not the owner of ticket {ticket_no}"
 
+        # Update the ticket
         cursor.execute(
             "UPDATE ticket_flights SET flight_id = ? WHERE ticket_no = ? AND flight_id = ?",
             (new_flight_id, ticket_no, current_flight_id)

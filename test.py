@@ -54,6 +54,7 @@ while True:
     )
     for event in events:
         _print_event(event, _printed)
+    print("here:", graph.get_state(config).next)
     if question == "end":
         break
     # for message_chunk, metadata in graph.stream(

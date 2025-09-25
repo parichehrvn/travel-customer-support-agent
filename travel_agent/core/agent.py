@@ -22,10 +22,6 @@ class Assistant:
 
     def __call__(self, state: State, config: RunnableConfig):
         while True:
-            configuration = config.get("configurable", {})
-            passenger_id = configuration.get("passenger_id", None)
-            state = {**state, "user_info": passenger_id}
-
             try:
                 result = self.runnable.invoke(state)
             except Exception as e:
